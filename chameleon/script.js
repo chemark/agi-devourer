@@ -275,8 +275,9 @@ async function triggerGeminiAPI() {
     geminiMessage.style.color = '#ffd700'; // Reset color
     geminiScore.innerText = '♻️';
     
-    const API_KEY = 'sk-sp-24c01ba7818f4a8fb178e26564040bdc';
-    const URL = `https://coding.dashscope.aliyuncs.com/v1/chat/completions`;
+    const API_KEY = 'sk-1c536633618044d08379ea411da99d83';
+    // 通过本地 CORS 代理中转，避免浏览器跨域拦截（proxy.js 监听 3001 端口）
+    const URL = `http://localhost:3001/chat/completions`;
     
     const promptText = `一只背上印着'AGI'的终极变色龙刚刚一口气生吞了这三大主流模型：【${ingredients}】。请用极度强烈的网络科技圈黑话、充满画面感和荒诞黑色幽默的 1 句简短的话（严格限制在50个字以内），描述它当场打出了一个怎样融合了这三家“臭毛病或特点”的极其生草的【算力废话怪嗝】！并根据模型被叠加后产生幻觉与降智的惨烈程度，给出一个 10 到 100 之间的变异战力得分。
 返回格式必须是纯 JSON 对象，绝对不能包含 markdown 的包裹标记：
@@ -290,12 +291,13 @@ async function triggerGeminiAPI() {
                 'Authorization': `Bearer ${API_KEY}`
             },
             body: JSON.stringify({
-                model: "MiniMax-M2.5",
+                model: "deepseek-chat",
                 messages: [
                     { role: "system", content: "你是一名疯狂搞笑且毒舌的 AI 科技解说员。" },
                     { role: "user", content: promptText }
                 ],
-                temperature: 0.9
+                temperature: 1.2,
+                stream: false
             })
         });
 
