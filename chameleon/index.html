@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>打嗝变色龙Burping Chameleon</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <!-- 背景层 -->
+        <div id="bg"></div>
+        
+        <!-- 游戏画布（舌头、苍蝇、UI） -->
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- 变色龙前景色 -->
+        <img id="chameleon" src="assets/chameleon.png" alt="Chameleon">
+        <div id="agi-tattoo">AGI</div>
+        
+        <!-- UI 层 -->
+        <div id="ui-layer">
+            <div id="score-board">算力融合进度: <span id="score" style="color:#00f0ff">0</span> <span style="font-size:24px; color:#aaa">/ 4000 AGI</span></div>
+            <div id="time-board">倒计时: <span id="time">120</span>s</div>
+            <div id="stomach">
+                <div>已吃奇葩配方：</div>
+                <div id="stomach-items"></div>
+            </div>
+            <div id="message-overlay" class="hidden">
+                <h2 id="gemini-message"></h2>
+                <div id="gemini-score"></div>
+                <!-- 追加重新开始的按钮，默认跟着框一起隐藏，依靠样式进一步控制复活按钮的曝光 -->
+                <button id="restart-btn" class="hidden" style="display:none;">重新开始吞噬</button>
+            </div>
+            
+            <div id="start-screen">
+                <h1>AGI 吞噬者</h1>
+                <p><strong>你只能做一件事：</strong>抓准时机按下空格，射出变异舌头！</p>
+                <p>目标：吞噬各路大模型，积累超过 <strong>4000</strong> 点算力！</p>
+                <p>融合的大模型特性越奇葩，API 算力爆炸的额外得分越高！</p>
+                <button id="start-btn">开始强行融合</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
