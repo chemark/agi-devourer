@@ -1,7 +1,7 @@
 # 👅 舌尖上的 AGI (Tongue-Tip AGI Adventure)
 
 > **Game Jam 主题**：你只能做一件事 (You can only do one thing)  
-> **在线体验**：[https://agi-tongue-game.pages.dev](https://agi-tongue-game.pages.dev)
+> **在线体验**：[https://agi.hoshikihao.com](https://agi.hoshikihao.com)
 
 《舌尖上的 AGI》是一款在 Game Jam（限时开发）活动中诞生的荒诞动作小游戏。在这里，玩家扮演一只面临「算力枯竭」的数字变色龙。在 60 秒的生存倒计时里，**你只能做一件事**：按下空格键射出变异的舌头，不断吞噬天上乱飞的大语言模型（ChatGPT、Claude、Gemini），完成算力积累，突破奇点进化！
 
