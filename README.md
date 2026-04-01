@@ -65,3 +65,13 @@ cd agi-devourer
 - [`开发学习笔记.md`](./开发学习笔记.md)：从 Canvas 绘画技巧、BFS 补丁到 API 安全管控等 12 个技术踩坑全总结。
 - [`赛前讨论.md`](./赛前讨论.md)：游戏原型立项探讨。
 - [`舌尖上的AGI_演示讲解稿.md`](./舌尖上的AGI_演示讲解稿.md)：准备好了一分钟现场评审 Pitch 文稿。
+
+## 🔗 参考资料 (References)
+
+- [武汉 AI GAME JAM 2026 实战复盘报告](https://mp.weixin.qq.com/s/BbHUgkqjycWjz_S42669uw)
+- [武汉 AI Game Jam 2026 圆满举办](http://www.app.dawuhanapp.com/p/46904982.html)
+- [哔哩哔哩视频 纪录片](https://www.bilibili.com/video/BV1KB97BfEfT/?vd_source=e0610098cf666eb90e216d07cd654193)
+- [狮子的牙齿官方报道](https://www.guozaoke.com/t/129662#reply12)
+- [创新光谷](https://mp.weixin.qq.com/s/PwlQ7zVd2nCD52xpL6cwTg)
+- [湖北日报](https://news.hubeidaily.net/hbrbsharenew/news_detail/5/5316020/4788822/0?historyback=1)
+- [长江日报](https://www.app.dawuhanapp.com/p/46904982.html)
