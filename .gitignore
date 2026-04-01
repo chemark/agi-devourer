@@ -1,3 +1,8 @@
 .DS_Store
 *.log
 node_modules/
+
+# API Keys - 本地密钥文件，绝不提交到 Git
+.env
+.env.local
+.env.*.local

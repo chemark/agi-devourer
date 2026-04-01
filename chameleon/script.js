@@ -12,6 +12,12 @@ function initAudio() {
     if (audioCtx.state === 'suspended') {
         audioCtx.resume();
     }
+    // 背景音乐：第一次用户交互时启动（浏览器要求必须有用户操作才能自播）
+    const bgm = document.getElementById('bgm');
+    if (bgm && bgm.paused) {
+        bgm.volume = 0.35; // 较低音量，不掩盖音效
+        bgm.play().catch(() => {}); // 忽略自播拦截错误
+    }
 }
 
 function playTone(freq, type, duration, vol=0.1) {
@@ -66,14 +72,185 @@ function playBurpSound() {
     osc.start();
     osc.stop(audioCtx.currentTime + 1.2);
 }
-// ------------------------------------
+
+// 胜利音效：上升多阶山 fanfare（小尔多式和弦上迸）
+function playWinSound() {
+    if (!audioCtx) return;
+    const notes = [523, 659, 784, 1047]; // C5 E5 G5 C6
+    notes.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.15);
+        gain.gain.setValueAtTime(0, audioCtx.currentTime + i * 0.15);
+        gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + i * 0.15 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.15 + 0.35);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(audioCtx.currentTime + i * 0.15);
+        osc.stop(audioCtx.currentTime + i * 0.15 + 0.4);
+    });
+    // 最后来一个连续长馌音
+    setTimeout(() => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1047, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(1318, audioCtx.currentTime + 0.5);
+        gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.0);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 1.0);
+    }, 600);
+}
+
+// 失败音效：下降沪谣步法（起侏魂音乐风）
+function playLoseSound() {
+    if (!audioCtx) return;
+    const notes = [392, 349, 311, 261]; // G4 F4 Eb4 C4 下行
+    notes.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.22);
+        gain.gain.setValueAtTime(0, audioCtx.currentTime + i * 0.22);
+        gain.gain.linearRampToValueAtTime(0.28, audioCtx.currentTime + i * 0.22 + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.22 + 0.38);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(audioCtx.currentTime + i * 0.22);
+        osc.stop(audioCtx.currentTime + i * 0.22 + 0.42);
+    });
+    // 最后拖长的一声屯丢音
+    setTimeout(() => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 1.5);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 1.5);
+    }, 900);
+}
+// ========== CSS 飘动云彩系统（独立于游戏循环）==========
+function initClouds() {
+    const layer = document.getElementById('cloud-layer');
+    // 生成 12 朵大小/速度/位置各异的云
+    for (let i = 0; i < 12; i++) {
+        // 每朵云由 3-5 个重叠 div 组成，模拟蓬松积云
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'absolute';
+        const topPct   = 5 + Math.random() * 75;   // 天空纵向位置 5%~80%
+        const startX   = Math.random() * 120 - 10;  // 起始横向位置 -10%~110%
+        const duration = 18 + Math.random() * 40;   // 漂移时长 18~58s（慢云远、快云近）
+        const delay    = -Math.random() * duration;  // 负延迟让云一开始就在运动中
+        const scale    = 0.6 + Math.random() * 1.2;  // 整体大小倍数
+
+        wrapper.style.cssText = `
+            position: absolute;
+            top: ${topPct}%;
+            left: ${startX}%;
+            width: ${120 * scale}px; height: ${60 * scale}px;
+            animation: cloudDrift ${duration}s ${delay}s linear infinite;
+            opacity: ${0.55 + Math.random() * 0.35};
+        `;
+
+        // 每朵云的气泡圆
+        const puffCount = 3 + Math.floor(Math.random() * 3);
+        for (let j = 0; j < puffCount; j++) {
+            const puff = document.createElement('div');
+            const r = (25 + Math.random() * 35) * scale;
+            const ox = j * (30 * scale) * (0.5 + Math.random() * 0.5);
+            const oy = (Math.random() - 0.5) * 20 * scale;
+            puff.style.cssText = `
+                position: absolute;
+                width: ${r * 2}px; height: ${r * 2}px;
+                border-radius: 50%;
+                background: radial-gradient(ellipse at 35% 30%,
+                    rgba(255,255,255,0.98) 0%,
+                    rgba(225,238,255,0.82) 55%,
+                    rgba(200,220,255,0) 100%);
+                left: ${ox}px; top: ${oy + 10 * scale}px;
+            `;
+            wrapper.appendChild(puff);
+        }
+        layer.appendChild(wrapper);
+    }
+}
+// =====================================
+
+// ========== 去除变色龙 PNG 白底，实现实色显示 ==========
+function removeWhiteBackground(img, threshold = 38) {
+    const tmp = document.createElement('canvas');
+    tmp.width  = img.naturalWidth;
+    tmp.height = img.naturalHeight;
+    const c = tmp.getContext('2d');
+    c.drawImage(img, 0, 0);
+    const id = c.getImageData(0, 0, tmp.width, tmp.height);
+    const d = id.data, w = tmp.width, h = tmp.height;
+
+    // BFS 从图片四周边缘向内洋论充，只删边缘连通的白色像素
+    const visited = new Uint8Array(w * h);
+    const queue = [];
+    const isWhite = px => {
+        const i = px * 4;
+        return d[i] >= 255-threshold && d[i+1] >= 255-threshold && d[i+2] >= 255-threshold;
+    };
+    // 初始化四边属白色像素
+    for (let x = 0; x < w; x++) { if (isWhite(x)) queue.push(x); if (isWhite((h-1)*w+x)) queue.push((h-1)*w+x); }
+    for (let y = 1; y < h-1; y++) { if (isWhite(y*w)) queue.push(y*w); if (isWhite(y*w+w-1)) queue.push(y*w+w-1); }
+
+    while (queue.length) {
+        const px = queue.pop();
+        if (px < 0 || px >= w*h || visited[px] || !isWhite(px)) continue;
+        visited[px] = 1;
+        d[px*4+3] = 0; // 透明
+        const x = px % w;
+        if (x > 0)   queue.push(px-1);
+        if (x < w-1) queue.push(px+1);
+        if (px >= w) queue.push(px-w);
+        if (px < (h-1)*w) queue.push(px+w);
+    }
+    c.putImageData(id, 0, 0);
+    return tmp.toDataURL('image/png');
+}
+
+function initTransparentChameleon() {
+    const el = document.getElementById('chameleon');
+    try {
+        const dataUrl = removeWhiteBackground(el);
+        el.src = dataUrl;
+        el.style.mixBlendMode = 'normal';  // 去掉混合模式，变色龙现在实色
+        el.style.filter = 'contrast(1.1) brightness(1.0) saturate(1.6)'; // 默认原色
+        el.style.transition = 'filter 0.5s ease';
+        console.log('✅ 变色龙白底已移除，实色模式开启');
+    } catch(e) {
+        console.warn('白底移除失败，保留混合模式:', e);
+    }
+}
+
+// 图片加载完成后处理（如果已加载完直接调用）
+const _chameleonEl = document.getElementById('chameleon');
+if (_chameleonEl.complete && _chameleonEl.naturalWidth > 0) {
+    initTransparentChameleon();
+} else {
+    _chameleonEl.addEventListener('load', initTransparentChameleon, { once: true });
+}
+// =====================================================
 
 // Game State
 let gameState = 'start'; 
 let score = 0;
-let timeLeft = 120;
+const INITIAL_TIME = 60;  // 统一管理游戏时长，修改只需改这一处
+let timeLeft = INITIAL_TIME;
 let lastTime = 0;
-const TARGET_SCORE = 4000; // 降低胜利难度
+const TARGET_SCORE = 4000;
 
 // Chameleon Head (Reticle)
 const head = {
@@ -89,11 +266,12 @@ const head = {
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    head.x = canvas.width / 2;
-    head.y = canvas.height * 0.83;
+    head.x = canvas.width * 0.50;   // 水平居中
+    head.y = canvas.height * 0.68;  // 上移至变色龙嘴部高度
 }
 window.addEventListener('resize', resizeCanvas);
-resizeCanvas(); 
+resizeCanvas();
+initClouds(); // 初始化云彩
 
 // Tongue State
 const tongue = {
@@ -109,19 +287,22 @@ const tongue = {
 
 // Flies Array - WITH BASE VALUES
 const flies = [];
+// 变色龙底色是青蓝色 (色相 ≈190°)。
+// hue 字段是用于 sepia 基底(≈30°)的 hue-rotate 偏移量，目标色 = 30° + hue
 const flyWords = [
-    { text: 'OpenAI', name: '闭源王者OpenAI', value: 300 },
-    { text: 'Claude', name: '长文刺客Claude', value: 280 },
-    { text: 'Gemini', name: '全能怪兽Gemini', value: 280 },
-    { text: 'Grok', name: '大嘴巴推特Grok', value: 200 },
-    { text: 'Qwen', name: '通义千问', value: 220 },
-    { text: 'Kimi', name: '卷王之王Kimi', value: 200 },
-    { text: 'MiniMax', name: '星野MiniMax', value: 150 },
-    { text: 'Doubao', name: '字节豆包', value: 180 },
-    { text: 'Llama3', name: '开源Llama3', value: 250 }
+    { text: 'OpenAI',  name: '闭源王者OpenAI',  value: 300, hue:  90 }, // 30+90=120°  翠绿 (OpenAI)
+    { text: 'Claude',  name: '长文刺客Claude',  value: 280, hue:   5 }, // 30+5=35°    珊瑚橙 (Anthropic)
+    { text: 'Gemini',  name: '全能怪兽Gemini',  value: 280, hue: 180 }, // 30+180=210° 宝石蓝 (Google)
+    { text: 'Grok',    name: '大嘴巴推特Grok',  value: 200, hue: 310 }, // 30+310=340° 暗玫红 (X/Twitter)
+    { text: 'Qwen',    name: '通义千问',          value: 220, hue: 320 }, // 30+320=350° 中国红 (阿里)
+    { text: 'Kimi',    name: '卷王之Kimi',       value: 200, hue: 150 }, // 30+150=180° 青碧 (Moonshot)
+    { text: 'MiniMax', name: '星野MiniMax',       value: 150, hue: 250 }, // 30+250=280° 星空紫
+    { text: 'Doubao',  name: '字节豆包',          value: 180, hue:  30 }, // 30+30=60°   金黄 (ByteDance)
+    { text: 'Llama3',  name: '开源Llama3',       value: 250, hue: 215 }, // 30+215=245° Meta蓝
 ];
 
 let stomach = [];
+let eatenModels = []; // 记录本局吃过的所有模型（用于结局 API 调用）
 
 // DOM Elements
 const scoreEl = document.getElementById('score');
@@ -134,18 +315,70 @@ const geminiMessage = document.getElementById('gemini-message');
 const geminiScore = document.getElementById('gemini-score');
 const gameContainer = document.getElementById('game-container');
 const restartBtn = document.getElementById('restart-btn');
+const aiStoryEl = document.getElementById('ai-story');
+
+// ===== 结局时调用 DeepSeek 生成专属故事 =====
+const WORKER_URL = 'https://agi-tongue-proxy.chengchuanhao728494.workers.dev';
+
+async function showEndgameResult(isWin) {
+    // 提取本局吃过的模型名，去重 + 最多叕6个
+    const uniqueModels = [...new Set(eatenModels)];
+    const sample = uniqueModels.slice(0, 6);
+    const modelList = sample.length > 0 ? sample.join('、') : '一个模型也没吃到';
+
+    // 显示结算界面，先用加载提示占位
+    aiStoryEl.innerHTML = '⏳ AI 正在弄文案，稍等……';
+
+    const promptWin  = `一只变色龙在60秒内吸收了「${modelList}」，终于突破奇点进化为AGI！用60字内荒诞科技黑话写一段史诗胜利宣言，最后加一句毒舌赞语。纯JSON返回：{"story":"..."}`;
+    const promptLose = `一只变色龙吸收了「${modelList}」，却只积累了${score}点，距AGI还有${Math.max(0, 4000 - score)}点就力竭而死。用60字内荒诞科技黑话写最后一嗝的气息，要幽默而凄凉。纯JSON返回：{"story":"..."}`;
+
+    try {
+        const res = await fetch(WORKER_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'deepseek-chat',
+                messages: [
+                    { role: 'system', content: '你是毒舌AI科技解说员，只返回纯JSON。' },
+                    { role: 'user',   content: isWin ? promptWin : promptLose }
+                ],
+                temperature: 1.3,
+                stream: false
+            })
+        });
+        const json = await res.json();
+        const raw = json.choices?.[0]?.message?.content ?? '';
+        const match = raw.match(/\{[\s\S]*?"story"\s*:\s*"([\s\S]*?)"[\s\S]*?\}/);
+        const story = match ? match[1].replace(/\\n/g, ' ') : raw.slice(0, 80);
+        aiStoryEl.innerHTML = `💬 ${story}`;
+    } catch (e) {
+        // API 失败用备用文案
+        const fallback = isWin
+            ? '🎵 内部AGI就序已可展开，变色龙打了一个截断半个网络的异度思维混天大嗓。'
+            : '💨 局部神经元风暴完解，变色龙发出最后一个如过拟合的废气就死了。';
+        aiStoryEl.innerHTML = fallback;
+    }
+}
+// =====================================================
+
 
 // Win check logic
 function checkWin() {
     if (score >= TARGET_SCORE && gameState !== 'gameover') {
         gameState = 'gameover';
+        const bgm = document.getElementById('bgm');
+        if (bgm) { bgm.pause(); bgm.currentTime = 0; }
+        playWinSound();
         messageOverlay.classList.remove('hidden');
-        restartBtn.style.display = 'block'; // 胜利时展示重玩
-        geminiMessage.innerHTML = '✨ 算力融合已达到临界值 ✨<br>变色龙突破奇点，进化为真正的 AGI！';
+        messageOverlay.style.background = 'rgba(0, 40, 20, 0.93)';
+        restartBtn.style.display = 'block';
+        document.getElementById('continue-hint').style.display = 'none';
+        geminiMessage.innerHTML = '✨ AGI 诞生！变色龙突破奇点 ✨';
         geminiMessage.style.color = '#00f0ff';
-        geminiScore.innerText = `最终恐怖算力: ${score}`;
-        playEatSound(); 
-        setTimeout(playBurpSound, 300); 
+        geminiScore.innerText = `最终算力: ${score} 点`;
+        playEatSound();
+        setTimeout(playBurpSound, 300);
+        showEndgameResult(true); // 🤖 调用 DeepSeek 生成胜利故事
     }
 }
 
@@ -177,17 +410,7 @@ function checkCollision(px, py, circle) {
 function update(dt) {
     if (gameState !== 'playing') return;
 
-    // Swinging Line
-    if (!tongue.active) {
-        head.angle += head.swingSpeed * dt * head.direction;
-        if (head.angle > head.baseAngle + head.swingRange) {
-            head.angle = head.baseAngle + head.swingRange;
-            head.direction = -1;
-        } else if (head.angle < head.baseAngle - head.swingRange) {
-            head.angle = head.baseAngle - head.swingRange;
-            head.direction = 1;
-        }
-    }
+    // 头部角度现在由 mousemove 事件实时更新，这里只做其他逻辑
 
     // Tongue logic
     if (tongue.active) {
@@ -248,13 +471,20 @@ function update(dt) {
 function digestFly(fly) {
     if (stomach.length < 3) {
         stomach.push(fly.word);
+        eatenModels.push(fly.word.name); // 📝 记录本局吃过的模型
         renderStomach();
-        
+        // 吃到哪个模型就变成该模型的专属品牌色
+        // grayscale+sepia 先归一化色调，再 hue-rotate 染上精确颜色
+        const hue = fly.word.hue ?? 0;
+        const cEl = document.getElementById('chameleon');
+        cEl.style.filter = `grayscale(1) sepia(1) hue-rotate(${hue}deg) saturate(4) brightness(0.92)`;
+
         if (stomach.length === 3) {
-            triggerGeminiAPI();
+            triggerCombo();
         }
     }
 }
+
 
 function renderStomach() {
     stomachEl.innerHTML = stomach.map(item => `
@@ -263,130 +493,89 @@ function renderStomach() {
         </div>`).join('');
 }
 
-async function triggerGeminiAPI() {
-    // If we just won this tick from the 3rd fly, do not pause for API
-    if (gameState === 'gameover') return;
+// 浮动得分飞字
+function showFloatingScore(text, x, y) {
+    const el = document.createElement('div');
+    el.style.cssText = `
+        position: fixed; left: ${x}px; top: ${y}px;
+        transform: translateX(-50%);
+        font-size: 52px; font-weight: bold;
+        color: #ffd700;
+        text-shadow: 0 0 15px #ff007f, 0 0 30px #ff007f;
+        font-family: 'ZCOOL KuaiLe', cursive;
+        pointer-events: none; z-index: 100;
+        animation: floatUp 1.6s ease-out forwards;
+        white-space: nowrap;
+    `;
+    el.textContent = text;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1700);
+}
 
-    gameState = 'api_loading';
-    
+let isApiPending = false; // 防止重复触发
+
+async function triggerCombo() {
+    if (gameState === 'gameover' || isApiPending) return;
+    isApiPending = true;
+
     const ingredients = stomach.map(i => i.name).join('、');
-    messageOverlay.classList.remove('hidden');
-    geminiMessage.innerHTML = `AGI 变色龙正在吞噬融合【${ingredients}】的算力...<br>直连国内超高速中枢 (MiniMax) 中...`;
-    geminiMessage.style.color = '#ffd700'; // Reset color
-    geminiScore.innerText = '♻️';
-    
-    const API_KEY = 'sk-1c536633618044d08379ea411da99d83';
-    // 通过本地 CORS 代理中转，避免浏览器跨域拦截（proxy.js 监听 3001 端口）
-    const URL = `http://localhost:3001/chat/completions`;
-    
-    const promptText = `一只背上印着'AGI'的终极变色龙刚刚一口气生吞了这三大主流模型：【${ingredients}】。请用极度强烈的网络科技圈黑话、充满画面感和荒诞黑色幽默的 1 句简短的话（严格限制在50个字以内），描述它当场打出了一个怎样融合了这三家“臭毛病或特点”的极其生草的【算力废话怪嗝】！并根据模型被叠加后产生幻觉与降智的惨烈程度，给出一个 10 到 100 之间的变异战力得分。
-返回格式必须是纯 JSON 对象，绝对不能包含 markdown 的包裹标记：
-{"description": "极尽搞笑的科技梗反应小作文", "score": 99}`;
+    // 在清空胃前先记录最后吃的模型的颜色
+    const lastHue = stomach.length > 0 ? (stomach[stomach.length-1].hue ?? 0) : 0;
+    stomach = [];
+    renderStomach();
+
+    const chameleonEl = document.getElementById('chameleon');
+    chameleonEl.classList.add('combo-burst');
+    // 1.5s 后移除动画同时重新施加品牌色，防止动画覆盖
+    setTimeout(() => {
+        chameleonEl.classList.remove('combo-burst');
+        chameleonEl.style.filter = `grayscale(1) sepia(1) hue-rotate(${lastHue}deg) saturate(4) brightness(0.92)`;
+    }, 1500);
+
+    playBurpSound();
+    gameContainer.classList.add('shake');
+    setTimeout(() => gameContainer.classList.remove('shake'), 500);
+
+    showFloatingScore('⚡ 三连！', head.x, head.y - 80);
+
+    const WORKER_URL_COMBO = WORKER_URL; // 共用全局 Worker URL
+    const promptText = `一只变色龙吞了《${ingredients}》，甦50字内荒诞科技黑话描述打出了怎样的算力怪嗓，并百个10-100的变异得分。绯JSON返回：{"description":"...","score":99}`;
 
     try {
-        const response = await fetch(URL, {
+        const response = await fetch(WORKER_URL_COMBO, {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${API_KEY}`
-            },
+            headers: { 'Content-Type': 'application/json' }, // API Key 已在 Worker 里
             body: JSON.stringify({
-                model: "deepseek-chat",
+                model: 'deepseek-chat',
                 messages: [
-                    { role: "system", content: "你是一名疯狂搞笑且毒舌的 AI 科技解说员。" },
-                    { role: "user", content: promptText }
+                    { role: 'system', content: '你是毒舌AI科技解说员，只返回纯JSON。' },
+                    { role: 'user', content: promptText }
                 ],
-                temperature: 1.2,
-                stream: false
+                temperature: 1.2, stream: false
             })
         });
-
         const data = await response.json();
-        if (!response.ok) {
-            throw new Error(`API 报错啦！HTTP ${response.status}: ${data.error ? data.error.message : '未知原因'}`);
-        }
-        if (!data.choices || !data.choices[0].message) {
-            throw new Error(`API 返回格式异常或触发了安全屏蔽: ${JSON.stringify(data)}`);
-        }
         const rawText = data.choices[0].message.content;
-        
         let result;
-        try {
-            result = JSON.parse(rawText.trim());
-        } catch (e) {
-            console.error("Gemini JSON Parse Error:", rawText);
-            const scoreMatch = rawText.match(/(\d{2,3})/);
-            result = {
-                description: rawText.replace(/[\{\}\[\]"']/g, '').substring(0, 70) + '...',
-                score: scoreMatch ? parseInt(scoreMatch[0]) : 50
-            };
-        }
+        try { result = JSON.parse(rawText.trim()); }
+        catch { result = { score: 50 }; }
 
-        playBurpSound(); 
-        
-        const gainedScore = result.score || 50;
-        score += gainedScore;
+        const gained = result.score || 50;
+        score += gained;
         scoreEl.innerText = score;
-        
-        // If we won from the Gemini bonus!
-        if (score >= TARGET_SCORE) {
-            checkWin();
-            return;
-        }
-
-        geminiMessage.innerText = result.description;
-        geminiScore.innerText = `AI裂变额外奖励 +${gainedScore}`;
-        
-        gameContainer.classList.add('shake');
-        setTimeout(() => gameContainer.classList.remove('shake'), 500);
-        
-        setTimeout(() => {
-            if (gameState === 'gameover') return; // Do not dismiss if gameover
-            stomach = [];
-            renderStomach();
-            messageOverlay.classList.add('hidden');
-            gameState = 'playing';
-        }, 4500); 
-
-    } catch (error) {
-        console.error("Gemini API Network/Break Error:", error);
-        playBurpSound(); 
-        
-        // 本地离线搞笑文案保底机制，确保 API 万一断网或配额用光，也会按套路继续生成笑话增加可玩性
-        const fallbackJokes = [
-            `AGI 变色龙被【${ingredients}】辣穿了主板电路，打出了一个全是二进制乱码的震天臭嗝！`,
-            `吞并【${ingredients}】导致了严重幻觉，它当场长出第三只眼睛并呕吐出一地报错堆栈！`,
-            `【${ingredients}】的算力发生严重互斥！它打嗝时从嘴里直接喷出了无数个无响应的五颜六色弹窗！`,
-            `勉强消化了【${ingredients}】，由于离线降智，它变异出了一对酷炫的机械翅膀但只能贴地滑行！`,
-            `因网络掉线，【${ingredients}】在它的模拟胃里发酵成了一股浓烈的赛博离线憋屈屁...`
-        ];
-        const randomJoke = fallbackJokes[Math.floor(Math.random() * fallbackJokes.length)];
-        const offlineScore = 50 + Math.floor(Math.random() * 50);
-
-        // 利用 innerHTML 追加一段红色的微小诊断字幕，以便排查是网断了还是限流了
-        geminiMessage.innerHTML = `${randomJoke}<br><br><span style="font-size:18px; color:#ff3366; text-shadow:none; background:rgba(0,0,0,0.5); padding:5px; border-radius:5px;">(API诊断信息: ${error.message})</span>`;
-        geminiScore.innerText = `离线幻觉加分 +${offlineScore}`;
-        
-        score += offlineScore;
+        setTimeout(() => showFloatingScore(`+${gained}`, head.x, head.y - 60), 800);
+        checkWin();
+    } catch {
+        const gained = 50 + Math.floor(Math.random() * 50);
+        score += gained;
         scoreEl.innerText = score;
-        
-        gameContainer.classList.add('shake');
-        setTimeout(() => gameContainer.classList.remove('shake'), 500);
-
-        if (score >= TARGET_SCORE) {
-            checkWin();
-            return;
-        }
-
-        setTimeout(() => {
-            if (gameState === 'gameover') return;
-            stomach = [];
-            renderStomach();
-            messageOverlay.classList.add('hidden');
-            gameState = 'playing';
-        }, 4500);
+        setTimeout(() => showFloatingScore(`+${gained}`, head.x, head.y - 60), 800);
+        checkWin();
+    } finally {
+        isApiPending = false;
     }
 }
+
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -404,25 +593,148 @@ function draw() {
     }
 
     if (tongue.active) {
-        ctx.beginPath();
-        ctx.moveTo(head.x, head.y);
-        ctx.lineTo(tongue.x, tongue.y);
-        ctx.strokeStyle = '#ff6b6b';
-        ctx.lineCap = 'round';
-        ctx.lineWidth = 18; 
-        ctx.stroke();
+        const tx = tongue.x;
+        const ty = tongue.y;
+        const bx = head.x;
+        const by = head.y;
+        const dx = tx - bx;
+        const dy = ty - by;
+        const len = Math.sqrt(dx*dx + dy*dy) || 1;
+        const ux = dx / len;
+        const uy = dy / len;
+        const nx = -uy;
+        const ny =  ux;
+        const tipAngle = Math.atan2(dy, dx);
 
+        // === 1. 舌体：Bezier 弧线（自然肌肉弯曲） ===
+        // 中间加轻微横向偏移，模拟舌头飞出时的自然弧度
+        const sway = Math.sin(performance.now() * 0.005) * (len * 0.04);
+        const midX = (bx + tx) / 2 + nx * sway;
+        const midY = (by + ty) / 2 + ny * sway;
+
+        const rootW = 11;  // 根部宽（嘴巴出口）
+        const midW  = 10;  // 中段最饱满
+        const tipW  = 5;   // 舌颈细收（连接吸盘）
+
+        // 用 quadratic bezier 绘制舌体上下两条边
+        ctx.save();
         ctx.beginPath();
-        ctx.arc(tongue.x, tongue.y, 25, 0, Math.PI * 2);
-        ctx.fillStyle = '#ff4757';
+        ctx.moveTo(bx + nx * rootW, by + ny * rootW);
+        ctx.quadraticCurveTo(midX + nx * midW, midY + ny * midW, tx + nx * tipW, ty + ny * tipW);
+        ctx.lineTo(tx - nx * tipW, ty - ny * tipW);
+        ctx.quadraticCurveTo(midX - nx * midW, midY - ny * midW, bx - nx * rootW, by - ny * rootW);
+        ctx.closePath();
+
+        // 舌体渐变：根部暗红 → 中段肉红 → 尖端珊瑚
+        const bodyGrad = ctx.createLinearGradient(bx, by, tx, ty);
+        bodyGrad.addColorStop(0.0, '#b83028');
+        bodyGrad.addColorStop(0.45, '#d95248');
+        bodyGrad.addColorStop(1.0,  '#e87060');
+        ctx.fillStyle = bodyGrad;
         ctx.fill();
-        
+        ctx.restore();
+
+        // 中轴湿润高光（沿 bezier 上边画亮线）
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(bx + nx * rootW * 0.32, by + ny * rootW * 0.32);
+        ctx.quadraticCurveTo(midX + nx * midW * 0.32, midY + ny * midW * 0.32,
+                             tx  + nx * tipW  * 0.32, ty  + ny * tipW  * 0.32);
+        ctx.strokeStyle = 'rgba(255, 205, 195, 0.52)';
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        ctx.restore();
+
+        // 底侧阴影（增强圆柱立体感）
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(bx - nx * rootW * 0.75, by - ny * rootW * 0.75);
+        ctx.quadraticCurveTo(midX - nx * midW * 0.75, midY - ny * midW * 0.75,
+                             tx   - nx * tipW  * 0.75, ty   - ny * tipW  * 0.75);
+        ctx.strokeStyle = 'rgba(100, 15, 10, 0.3)';
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        ctx.restore();
+
+        // 横向肌肉环纹（每隔一段一条淡暗弧线，模拟蛇形肌肉段）
+        const ringCount = 7;
+        for (let i = 1; i < ringCount; i++) {
+            const t = i / ringCount;
+            // 沿直线插值（近似 bezier 上的位置）
+            const rx = bx + ux * len * t + nx * sway * Math.sin(t * Math.PI);
+            const ry = by + uy * len * t + ny * sway * Math.sin(t * Math.PI);
+            const rw = (rootW * (1 - t) + tipW * t) * 0.85;
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(rx + nx * rw, ry + ny * rw);
+            ctx.lineTo(rx - nx * rw, ry - ny * rw);
+            ctx.strokeStyle = `rgba(130, 20, 15, ${0.12 + 0.05 * Math.sin(t * Math.PI)})`;
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // === 2. 舌尖：大型蘑菇状粘液吸盘 ===
+        const ballR = 22;
+
+        // 吸盘主体：沿垂直方向宽（蘑菇帽横截面），沿射出方向略压扁
+        const sGrad = ctx.createRadialGradient(
+            tx - ux * 5 - nx * 7, ty - uy * 5 - ny * 7, 1,
+            tx, ty, ballR * 1.15
+        );
+        sGrad.addColorStop(0.00, '#ff8c78');  // 高光中心
+        sGrad.addColorStop(0.30, '#e04040');  // 主色
+        sGrad.addColorStop(0.70, '#9e1820');  // 暗部
+        sGrad.addColorStop(1.00, '#5a080c');  // 最暗边缘
+        ctx.save();
+        ctx.beginPath();
+        // 垂直于射出方向的轴更宽（ballR），射出方向上压扁（ballR * 0.68）
+        ctx.ellipse(tx, ty, ballR * 0.68, ballR, tipAngle + Math.PI / 2, 0, Math.PI * 2);
+        ctx.fillStyle = sGrad;
+        ctx.fill();
+        ctx.restore();
+
+        // 前端粘液凹坑（扁椭圆形凹陷）
+        ctx.save();
+        ctx.beginPath();
+        ctx.ellipse(
+            tx + ux * (ballR * 0.28),
+            ty + uy * (ballR * 0.28),
+            ballR * 0.44, ballR * 0.30,
+            tipAngle, 0, Math.PI * 2
+        );
+        ctx.fillStyle = 'rgba(55, 5, 5, 0.52)';
+        ctx.fill();
+        ctx.restore();
+
+        // 主高光点（左上偏移，大）
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(tx - ux * 6 - nx * 8, ty - uy * 6 - ny * 8, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 235, 225, 0.78)';
+        ctx.fill();
+        ctx.restore();
+
+        // 副高光点（更小，增加湿润感）
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(tx - ux * 2 - nx * 12, ty - uy * 2 - ny * 12, 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 235, 225, 0.42)';
+        ctx.fill();
+        ctx.restore();
+
+        // === 3. 已抓住猎物：显示在舌尖上方 ===
         if (tongue.caughtFly) {
-            ctx.font = '24px Arial bold';
+            ctx.font = 'bold 20px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#111';
-            ctx.fillText(tongue.caughtFly.word.text, tongue.x, tongue.y);
+            ctx.strokeStyle = '#7b0000';
+            ctx.lineWidth = 4;
+            ctx.strokeText(tongue.caughtFly.word.text, tx, ty - ballR - 14);
+            ctx.fillStyle = '#ffe8e0';
+            ctx.fillText(tongue.caughtFly.word.text, tx, ty - ballR - 14);
         }
     }
 
@@ -442,8 +754,9 @@ function draw() {
         ctx.ellipse(fly.x + rectWidth/2 - 10, fly.y + yOffset - wingOffset, 22, 6, Math.PI/4, 0, Math.PI*2);
         ctx.fill();
 
-        // Capsule Body
-        ctx.fillStyle = '#222';
+        // Capsule Body — 用模型品牌色（sepia 基底 30° + hue 偏移 = 模型目标色）
+        const modelHue = (30 + (fly.word.hue ?? 0)) % 360;
+        ctx.fillStyle = `hsl(${modelHue}, 75%, 22%)`;  // 深色背景
         ctx.beginPath();
         if (ctx.roundRect) {
             ctx.roundRect(fly.x - rectWidth/2, fly.y - 20 + yOffset, rectWidth, 40, 20);
@@ -451,15 +764,16 @@ function draw() {
             ctx.ellipse(fly.x, fly.y + yOffset, rectWidth/2, 20, 0, 0, Math.PI*2);
         }
         ctx.fill();
-        ctx.strokeStyle = '#00f0ff';
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = `hsl(${modelHue}, 100%, 65%)`;  // 亮色描边
+        ctx.lineWidth = 2.5;
         ctx.stroke();
 
         // LLM Text
-        ctx.fillStyle = '#a8ff78'; 
+        ctx.fillStyle = `hsl(${modelHue}, 100%, 85%)`;  // 浅色文字与背景形成对比
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(fly.word.text, fly.x, fly.y + yOffset);
+
     });
 }
 
@@ -480,34 +794,62 @@ setInterval(() => {
         timeEl.innerText = timeLeft;
         if (timeLeft <= 0) {
             gameState = 'gameover';
+            const bgm = document.getElementById('bgm');
+            if (bgm) { bgm.pause(); bgm.currentTime = 0; }
+            playLoseSound();
             messageOverlay.classList.remove('hidden');
-            restartBtn.style.display = 'block'; // 倒计时结算展示重玩
-            geminiMessage.innerText = '算力枯竭！在降智幻觉中停止了思考！';
+            messageOverlay.style.background = 'rgba(40, 0, 0, 0.93)';
+            restartBtn.style.display = 'block';
+            document.getElementById('continue-hint').style.display = 'none';
+            geminiMessage.innerText = '💥 算力崩溃！进化中止！';
             geminiMessage.style.color = '#ff3366';
-            geminiScore.innerText = `停滞于: ${score} 点`;
+            geminiScore.innerText = `最终算力: ${score} 点（还差 ${Math.max(0, 4000-score)} 点通关）`;
+            showEndgameResult(false); // 🤖 调用 DeepSeek 生成失败坟气
         }
     }
 }, 1000);
 
+// 鼠标移动：实时计算头部瞄准角度
+document.addEventListener('mousemove', (e) => {
+    if (gameState !== 'playing') return;
+    const dx = e.clientX - head.x;
+    const dy = e.clientY - head.y;
+    const raw = Math.atan2(dy, dx);
+    // 限制角度范围：只允许朝上半圆射出（避免穿地）
+    // -PI 到 0 是上半圆，并加少许左右处容差 15°
+    const minAngle = -Math.PI * 0.97; // 左上极限
+    const maxAngle = -Math.PI * 0.03; // 右上极限
+    head.angle = Math.max(minAngle, Math.min(maxAngle, raw));
+});
+
 window.addEventListener('keydown', (e) => {
     initAudio(); 
-    if (e.code === 'Space' && gameState === 'playing' && !tongue.active) {
-        tongue.active = true;
-        tongue.phase = 'extending';
-        tongue.x = head.x;
-        tongue.y = head.y;
-        playShootSound(); 
+    if (e.code === 'Space') {
+        e.preventDefault();
+        if (gameState === 'playing' && !tongue.active) {
+            tongue.active = true;
+            tongue.phase = 'extending';
+            tongue.x = head.x;
+            tongue.y = head.y;
+            tongue.length = 0;
+            playShootSound();
+        } else if (gameState === 'api_result') {
+            stomach = [];
+            renderStomach();
+            messageOverlay.classList.add('hidden');
+            gameState = 'playing';
+        }
     }
 });
 
+// 鼠标点击仅用于广挟储指示层的交互（如 api_result 继续），不再触发射击
 document.addEventListener('mousedown', () => {
     initAudio();
-    if (gameState === 'playing' && !tongue.active) {
-        tongue.active = true;
-        tongue.phase = 'extending';
-        tongue.x = head.x;
-        tongue.y = head.y;
-        playShootSound(); 
+    if (gameState === 'api_result') {
+        stomach = [];
+        renderStomach();
+        messageOverlay.classList.add('hidden');
+        gameState = 'playing';
     }
 });
 
@@ -525,19 +867,25 @@ restartBtn.addEventListener('click', () => {
     // 复位核心战斗数据
     score = 0;
     scoreEl.innerText = score;
-    timeLeft = 120;
+    timeLeft = INITIAL_TIME;
     timeEl.innerText = timeLeft;
     stomach = [];
+    eatenModels = []; // 重置模型记录
     renderStomach();
+    if (aiStoryEl) aiStoryEl.innerHTML = '';
     flies.length = 0; 
     
     head.direction = 1;
-    head.angle = head.baseAngle; // 重设瞄准锤
+    head.angle = head.baseAngle;
     tongue.active = false;
     
-    // 消隐 UI 与游戏状态转为激活
+    // 恢复继续提示的显示状态（下次触发 API 结果时需要它）
+    document.getElementById('continue-hint').style.display = '';
     restartBtn.style.display = 'none';
     messageOverlay.classList.add('hidden');
+    // 重启时恢复背景音乐
+    const bgm = document.getElementById('bgm');
+    if (bgm) { bgm.currentTime = 0; bgm.play().catch(() => {}); }
     gameState = 'playing';
 });
 
