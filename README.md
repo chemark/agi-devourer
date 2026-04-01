@@ -38,24 +38,37 @@ cd agi-devourer
 # 3. 浏览器访问：http://localhost:8000/chameleon
 ```
 
-## 🔒 后端 API 与部署配置
+## 🔒 生产环境部署方案（最佳实践）
 
-如果要跑通后端的 AI 算力怪嗝功能，你需要进行 Cloudflare 配置，以防止 API Key 在前端暴露。
+如果要将游戏发布至线上跑通大模型 API 功能，你需要在 Cloudflare 中配置后端（充当你的安全代理中转），严禁将 API Key 留在前端代码中。
 
-1. **部署 Worker 代理转发：**
-   ```bash
-   cd worker
-   npm install -g wrangler
-   wrangler deploy
-   ```
-2. **设置安全环境变量（重要）：**
-   ```bash
-   echo "sk-你的DeepSeekKey" | wrangler secret put DEEPSEEK_API_KEY
-   ```
-3. **部署至 Cloudflare Pages：**
-   ```bash
-   wrangler pages deploy ../chameleon --project-name agi-tongue-game
-   ```
+本项目采用前后端分离设计，结合本游戏的更新特性，我们强烈推荐以下**混合部署方案**：
+
+### 1. 部署后端大模型代理（推荐：Wrangler 手动）
+
+因为 `worker` 中的安全中转逻辑异常稳固，几乎不需要由于游戏迭代而去修改。低频率的手动发版可以最大化保护你在配置安全密钥时的资产，避免为了自动化而在 GitHub Secrets 中四处散播部署 Token。
+
+```bash
+cd worker
+npm install -g wrangler
+wrangler deploy
+
+# 发版后立刻配置你的私密环境变量（至关重要！）
+echo "sk-YourDeepSeekKey" | wrangler secret put DEEPSEEK_API_KEY
+```
+
+### 2. 部署前端游戏页面（推荐：GitHub 自动 CI/CD）
+
+游戏的显示画面、关卡数据变动会非常频繁，极其推荐启用自动化部署路线以取代 `wrangler pages deploy` 这类枯燥的重复命令。
+
+在你的 Cloudflare Dashboard -> Pages 页面：
+1. 点击 **Connect to Git**（连接到 Git）
+2. 绑定本 GitHub 仓库及 `main` 分支。
+3. 指定构建输出目录为：`/chameleon`。
+
+今后你每一次将新点子 `git push` 上云，Cloudflare 就会自动在后台打包更新全网的游戏节点，真正实现“一次配置，终身摸鱼”的工作流。
+
+*(如果你目前还不打算挂载 Git 仓库，纯手动将本地前端代码糊上外网的测试版命令为：`wrangler pages deploy ./chameleon --project-name agi-tongue-game`)*
 
 ## 📚 详细文档目录
 

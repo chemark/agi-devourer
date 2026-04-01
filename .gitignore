@@ -6,3 +6,6 @@ node_modules/
 .env
 .env.local
 .env.*.local
+
+# 不提交开发草稿笔记
+开发学习笔记.md
