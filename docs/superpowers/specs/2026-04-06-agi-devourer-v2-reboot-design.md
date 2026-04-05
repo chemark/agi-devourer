@@ -1,350 +1,365 @@
-# AGI Devourer V2 Reboot Design
+# 《舌尖上的 AGI》V2 重启版设计文档
 
-Date: 2026-04-06
-Status: Approved for planning
-Scope: New V2 alpha direction after fully abandoning the previous V2 implementation
+日期：2026-04-06
+状态：已通过脑暴确认，可进入实现规划
+范围：彻底放弃旧 V2 实现后，重新定义 V2 Alpha 的产品与技术方向
 
-## 1. Summary
+## 1. 设计摘要
 
-V2 will be rebuilt as a product-first mobile web experience rather than a gameplay-first prototype.
+新版 V2 不再以“先堆玩法”作为第一目标，而是改成一个“产品链路优先”的移动端 Web 产品。
 
-The product goal of the first release is to establish a clean user conversion loop:
+第一版要优先打通的不是最复杂的游戏机制，而是这条完整闭环：
 
-1. User lands on a portrait product homepage.
-2. User starts a run as a guest.
-3. User is guided into a landscape gameplay session.
-4. User sees a meaningful result screen.
-5. User is prompted to log in.
-6. After login, the held result is submitted to the leaderboard and the user receives ranking feedback.
+1. 用户进入竖屏产品首页
+2. 用户以游客身份直接开始挑战
+3. 用户被引导进入横屏游戏局内
+4. 用户完成一局并看到有情绪价值的结算
+5. 若用户未登录，则在结算页被明确引导登录
+6. 登录成功后，系统自动补交该局成绩并反馈排名
 
-This first release is not the final commercial product and not a pure visual demo. It is an alpha with correct product structure, stable flow, and clean boundaries for future real backend integration.
+这一版既不是最终商业成品，也不是纯演示稿，而是一个“产品骨架正确、主链路完整、未来易于接真服务”的 V2 Alpha。
 
-## 2. Product Direction
+## 2. 产品方向
 
-### 2.1 Primary product position
+### 2.1 产品定位
 
-The first V2 release is a light product shell wrapped around a replayable arcade game.
+第一版 V2 的定位是：
 
-The priority is:
+一个带有街机游戏内核的轻产品化 H5。
 
-1. Product flow clarity
-2. Login and leaderboard conversion structure
-3. Stable portrait-to-landscape experience
-4. Gameplay that is fun enough to support the loop
+优先级排序如下：
 
-The priority is not:
+1. 产品链路是否清晰
+2. 游客、登录、上榜这条转化链是否顺畅
+3. 竖屏首页到横屏游戏的切换是否自然
+4. 局内玩法是否有基础爽感和复玩欲
 
-1. Shipping the most feature-rich gameplay version
-2. Shipping full sharing and growth systems immediately
-3. Integrating real backend services in the first implementation pass
+这一版不优先追求：
 
-### 2.2 Core experience promise
+1. 最丰富的玩法系统
+2. 最完整的增长传播能力
+3. 真正接通后端与微信授权
 
-The user should feel:
+### 2.2 用户感受目标
 
-- "I can understand this quickly."
-- "I can play immediately as a guest."
-- "If I perform well, logging in to rank feels worthwhile."
+用户在第一版里应该自然感受到：
 
-## 3. Target Platform and Orientation Strategy
+- “我一眼就知道这是干什么的”
+- “我不用注册也能马上玩”
+- “这局成绩如果不错，我愿意登录去冲榜”
 
-### 3.1 Device priority
+## 3. 平台与横竖屏策略
 
-The first release is mobile web first.
+### 3.1 平台优先级
 
-### 3.2 Orientation model
+第一版以移动端 Web 为绝对优先，页面结构优先考虑手机访问体验。
 
-- The homepage is portrait-first.
-- The gameplay session is landscape-first.
-- The user does not jump directly from portrait homepage into active gameplay.
-- The user enters a dedicated landscape preparation screen first.
+### 3.2 横竖屏分工
 
-### 3.3 Rotation behavior
+新版 V2 采用“产品页竖屏，游戏页横屏”的组合：
 
-The selected behavior is:
+- 首页为竖屏产品首页
+- 真正的局内玩法为横屏
+- 用户不会从首页直接进入游戏局内
+- 用户会先进入横屏准备页，再正式开始
 
-- The user starts from a portrait product page.
-- After pressing the main challenge CTA, the app enters a preparation page.
-- The preparation page instructs the user to rotate the device.
-- The actual run begins only after the user reaches the landscape-ready state and confirms start.
+### 3.3 旋转引导策略
 
-This preserves product readability on entry while respecting two-hand gameplay ergonomics during play.
+已确认的策略是：
 
-## 4. User Flow
+- 用户从竖屏首页点击“立即挑战”
+- 进入横屏准备页
+- 准备页明确提示用户旋转设备
+- 只有在设备横屏且用户再次确认开始后，才真正开局
 
-The primary V2 alpha flow is:
+这样做的原因是：
 
-1. Portrait homepage
-2. Tap "Start Challenge"
-3. Landscape preparation page
-4. Landscape game session
-5. Result page
-6. Login prompt if user is still a guest
-7. Login success
-8. Pending score submission
-9. Leaderboard success feedback with current rank
-10. Replay or return to homepage
+- 首页竖屏更适合承接榜单、登录、活动位和产品信息
+- 局内横屏更适合双手握持与触控布局
+- 中间加入准备页后，横竖屏切换不会显得突兀
 
-### 4.1 Homepage intent
+## 4. 核心用户流程
 
-The homepage must:
+第一版 V2 的核心流程如下：
 
-- Establish product identity
-- Show ranking motivation
-- Provide a visible login entry
-- Provide a dominant start CTA
+1. 进入竖屏首页
+2. 点击“立即挑战”
+3. 进入横屏准备页
+4. 进入横屏游戏局内
+5. 完成结算
+6. 若为游客，则触发登录引导
+7. 完成登录
+8. 自动补交本局成绩
+9. 返回上榜成功反馈与当前名次
+10. 用户选择再来一局或返回首页
 
-The homepage must not:
+### 4.1 首页目标
 
-- Force login before the first run
-- Overload the user with story or complex onboarding
-- Behave like the active gameplay screen
+首页只承担四类职责：
 
-### 4.2 Result-to-login conversion
+- 建立产品认知
+- 给出明确挑战入口
+- 让用户看到竞争感与榜单动机
+- 给出登录入口，但不强制先登录
 
-The result page is the key conversion surface.
+首页不承担以下职责：
 
-If the user is not logged in:
+- 强行做复杂教程
+- 承载过重剧情
+- 直接充当游戏局内
 
-- The score is treated as pending
-- The page explains that login is required for ranking
-- The login action is presented as the path to preserve and rank that run
+### 4.2 结算到登录的转化逻辑
 
-If login succeeds:
+结算页是整条产品链路中的关键转化页。
 
-- The app returns to the result context
-- The pending score is submitted automatically
-- The user receives leaderboard confirmation and rank feedback
+当用户尚未登录时：
 
-## 5. Information Architecture
+- 系统保留本局成绩为“待提交状态”
+- 明确告诉用户“登录后可上榜”
+- 登录动作应当被设计成“保存这次高分并冲榜”的自然下一步
 
-The alpha should have only five core surfaces.
+当用户登录成功后：
 
-### 5.1 Portrait homepage
+- 应回到当前结果上下文
+- 自动发起这条待提交成绩的补交流程
+- 明确反馈“上榜成功”与当前排名
 
-Responsibilities:
+## 5. 页面结构与职责边界
 
-- Present title and short hook
-- Show leaderboard preview
-- Show login entry point
-- Offer a strong "Start Challenge" CTA
-- Optionally show a lightweight activity or battle report slot
+第一版只保留 5 个核心页面或层级，不继续扩张。
 
-### 5.2 Landscape preparation page
+### 5.1 竖屏首页
 
-Responsibilities:
+职责：
 
-- Explain that landscape is required before active play starts
-- Briefly show controls
-- Provide explicit start confirmation
+- 展示产品标题与一句钩子文案
+- 展示榜单预览
+- 展示微信登录入口位
+- 提供“立即挑战”主按钮
+- 可保留一个轻量活动位或战报位
 
-### 5.3 Landscape gameplay page
+### 5.2 横屏准备页
 
-Responsibilities:
+职责：
 
-- Run the 60-second session
-- Keep gameplay visually and interactively focused
-- Avoid unrelated product UI noise
+- 明确提示用户横屏
+- 简短说明操作方式
+- 提供正式开局确认按钮
 
-### 5.4 Result page
+横屏准备页是竖屏首页与横屏游戏之间的缓冲层，必须保留。
 
-Responsibilities:
+### 5.3 横屏游戏局内
 
-- Show score and performance summary
-- Show brief result copy
-- Explain ranking eligibility
-- Trigger login conversion when needed
+职责：
 
-### 5.5 Login prompt or login page
+- 跑完一局 60 秒挑战
+- 保持玩法层的专注与手感
+- 尽量避免登录、榜单、活动信息打断局内体验
 
-Responsibilities:
+### 5.4 结算页
 
-- Explain why login is needed
-- Complete the login state transition
-- Return the user to their score submission outcome
+职责：
 
-## 6. Gameplay Design for Alpha
+- 展示本局分数与结果摘要
+- 展示一条简短结果文案
+- 说明是否具备冲榜价值
+- 在用户未登录时触发登录引导
 
-### 6.1 Core loop
+### 5.5 登录弹层或登录页
 
-The first gameplay version must remain compact:
+职责：
 
-- One run lasts 60 seconds
-- The player controls a cyber chameleon hunting AI model targets
-- The interaction model stays simple and readable
-- The landscape layout should support comfortable two-hand mobile play
+- 解释为什么需要登录
+- 完成登录态切换
+- 回到当前成绩提交结果
 
-The gameplay should be fun enough to create replay desire, but it should not expand into a heavyweight system in the alpha.
+## 6. 第一版玩法设计
 
-### 6.2 Enemies
+### 6.1 核心局内规则
 
-The first version should include 3 to 5 AI model target types.
+第一版玩法要尽量轻，但要足够支撑产品转化。
 
-Variation comes from:
+核心规则：
 
-- Point value
-- Movement speed
-- Hit difficulty
+- 单局时长 60 秒
+- 玩家扮演赛博变色龙，吞噬空中的 AI 模型目标
+- 操作逻辑保持简单直观
+- 横屏布局要适配双手握持和触控操作
 
-The alpha should not include deep enemy AI, complex ability systems, or over-designed behavior trees.
+### 6.2 目标种类
 
-### 6.3 Difficulty pacing
+第一版只做 3 到 5 种 AI 模型敌人。
 
-The match pacing should follow three beats:
+它们之间的差异主要来自：
 
-- Early phase: teach the player quickly
-- Mid phase: introduce visible pressure and speed-up
-- Late phase: create a near-breakpoint feeling
+- 分值不同
+- 速度不同
+- 命中难度略有差异
 
-The full run should support the conversion goal:
+第一版不引入：
 
-- Loss should feel like "one more try"
-- Strong performance should feel worth ranking
+- 深度行为树
+- 复杂技能系统
+- 过重的特殊机制
 
-### 6.4 Result copy
+### 6.3 难度节奏
 
-The result screen should show short generated-feeling battle copy.
+整局节奏分成三个阶段：
 
-For alpha:
+- 前段：快速让玩家理解玩法
+- 中段：明显增加压力和速度
+- 后段：制造“差一点就更高分”的张力
 
-- The UX should reserve this as a product feature
-- The actual implementation can be rule-based or mock-generated
-- Real AI generation is not required in the first pass
+这一节奏必须服务结算情绪：
 
-## 7. Authentication and Leaderboard Strategy
+- 输了也要让人觉得想再来一局
+- 打得好时要让人觉得“值得登录去上榜”
 
-### 7.1 Login policy
+### 6.4 结果文案
 
-The selected product rule is:
+结算页需要有一条“像战报一样”的简短结果文案。
 
-- Guests can play immediately
-- Login is required before leaderboard submission
+第一版处理方式：
 
-### 7.2 Login provider strategy
+- 产品层保留这项能力的位置
+- 实现层先用规则模板或 mock 数据生成
+- 不在第一版接真实 AI 文案生成
 
-The long-term intended primary provider is WeChat login.
+## 7. 登录与榜单策略
 
-For alpha:
+### 7.1 登录规则
 
-- The UI, state model, and service interface should be designed around an eventual WeChat login flow
-- The actual login implementation is a mock flow
-- Real WeChat authorization is explicitly out of scope for the first pass
+已经确认的产品规则是：
 
-### 7.3 Leaderboard strategy
+- 游客可以直接开玩
+- 但若要上榜，必须先登录
 
-For alpha:
+### 7.2 登录方式策略
 
-- The leaderboard should behave like a product feature, not a fake screen
-- The service layer and app states should mimic real read/submit flows
-- The underlying implementation can use mock data and local logic
+长期目标是微信登录。
 
-This ensures the UI and flow do not need to be redesigned once real backend integration begins.
+但第一版只做到：
 
-## 8. Feature Scope
+- UI 结构、状态模型、服务接口都按未来微信登录来设计
+- 实际登录流程先用 mock 方式跑通
+- 明确不接真实微信 OAuth 或网页授权
 
-### 8.1 In scope for alpha
+### 7.3 榜单策略
 
-- Portrait mobile homepage
-- Landscape preparation page
-- Landscape gameplay session
-- Result page with conversion intent
-- Login flow as a mock WeChat-oriented product flow
-- Leaderboard preview and post-login ranking feedback
-- Mock product services for auth, leaderboard, and result copy
-- Rule-based or mock-generated result text
-- Guest-to-login-to-rank end-to-end flow
+第一版榜单的原则是：
 
-### 8.2 Out of scope for alpha
+- 体验上像真产品，而不是像静态演示图
+- 接口和状态流转按真实读榜、提交成绩来设计
+- 但底层先用 mock 数据与本地逻辑完成
 
-- Real WeChat OAuth integration
-- Real backend user system
-- Real remote leaderboard persistence
-- Share posters, QR code flow, and growth distribution
-- Heavy story systems
-- Complex meta progression
-- Overbuilt gameplay mechanics
+这样后续接真后端时，不需要推翻现有页面信息架构。
 
-## 9. Technical Architecture
+## 8. 第一版范围控制
 
-### 9.1 Recommended architecture
+### 8.1 第一版必须做
 
-The first pass should use:
+- 竖屏首页
+- 横屏准备页
+- 横屏游戏局内
+- 结算页
+- mock 登录流程
+- 榜单预览与上榜反馈
+- mock 的认证、榜单、结果文案服务
+- 游客到登录再到上榜的完整主链路
 
-- React + Vite + TypeScript for the product shell
-- A lightweight Canvas + TypeScript gameplay module for the active run
-- Mock service modules for auth, leaderboard, and result generation
+### 8.2 第一版明确不做
 
-### 9.2 Why not Phaser first
+- 真微信登录
+- 真后端用户系统
+- 真远端排行榜持久化
+- 分享海报、二维码传播、朋友圈战报
+- 复杂剧情系统
+- 局外成长系统
+- 过多玩法扩张
 
-Phaser is not rejected permanently. It is being deferred intentionally.
+## 9. 技术架构建议
 
-Reasoning:
+### 9.1 推荐架构
 
-- The previous V2 attempt became unstable while simultaneously handling engine complexity, gameplay, product screens, and service-like behavior
-- The alpha priority is product flow correctness, not engine depth
-- A lighter gameplay module reduces restart risk and speeds validation
+第一版推荐采用：
 
-If future iterations require richer animation, collision systems, or broader gameplay complexity, the gameplay container can be upgraded or replaced later without invalidating the product shell.
+- React + Vite + TypeScript 作为产品壳
+- 一个轻量的 Canvas + TypeScript 游戏模块作为局内实现
+- Mock Service 层承接认证、榜单和结果文案能力
 
-### 9.3 Module boundaries
+### 9.2 为什么这一版不先上 Phaser
 
-Recommended boundaries:
+不是因为 Phaser 不适合，而是因为这一轮重启的重点不是引擎能力，而是结构稳定性。
+
+延后 Phaser 的原因：
+
+- 上一版失败的根本问题不是“引擎不够强”，而是产品链路、玩法、账号、榜单、分享同时变重
+- 第一版要优先验证产品闭环，而不是优先构建重型玩法系统
+- 先用轻量 Canvas 模块更容易把局内玩法控制在“够玩、够稳”的范围内
+
+如果后续版本确实需要更复杂的碰撞、动画和敌人行为，再升级为 Phaser 会更稳。
+
+### 9.3 模块边界
+
+建议拆成以下边界：
 
 - `app shell`
-  Owns routing, orientation state, high-level product flow, and screen composition
+  管页面结构、横竖屏状态、全局产品流程
 - `game session`
-  Owns one gameplay run only
+  只管一局游戏
 - `result flow`
-  Owns score summary, pending submission state, and post-login completion
+  管结算展示、待提交成绩、登录后补交
 - `mock product services`
-  Own auth, leaderboard, and result generation contracts
+  管认证、榜单、结果文案接口
 
-The gameplay module must not directly own login or leaderboard logic.
+其中一个重要原则是：
 
-## 10. Data Flow
+游戏模块不能直接承担登录和榜单逻辑。
 
-The core alpha data flow is:
+## 10. 核心数据流
 
-1. Guest lands on homepage
-2. Guest starts a challenge
-3. User rotates and starts a run
-4. Game session produces score and result summary
-5. Result flow stores a pending leaderboard submission if user is not logged in
-6. User completes mock login
-7. Auth state updates globally
-8. Pending score is submitted through leaderboard service
-9. User sees confirmation, rank, and replay options
+第一版必须稳定支持这条数据流：
 
-This flow is the backbone of the alpha and must be preserved even when internal implementations change.
+1. 游客进入首页
+2. 游客开始挑战
+3. 用户横屏后进入一局游戏
+4. 局内产出分数与结果摘要
+5. 若用户未登录，则把成绩保存为待提交状态
+6. 用户完成 mock 登录
+7. 全局登录态更新
+8. 系统自动补交待提交成绩
+9. 页面反馈当前名次与上榜成功状态
 
-## 11. Error Handling and Fallbacks
+这是第一版最重要的结构主干，后续实现方式可以调整，但这条链路不能丢。
 
-The alpha should degrade gracefully:
+## 11. 错误处理与降级策略
 
-- If login fails, the current result must remain visible and recoverable
-- If leaderboard submission fails, the user should be informed without losing the run context
-- If result generation fails, the UI should fall back to fixed template copy
-- If the device is not in the expected orientation, the user should see a clear rotate prompt and a way back
+第一版需要明确支持以下降级：
 
-## 12. Validation Criteria
+- 登录失败时，不清空当前结果，仍保留重新尝试入口
+- 榜单提交失败时，不丢失当前分数与结果页上下文
+- 结果文案生成失败时，回退到固定模板文案
+- 用户未横屏时，不允许正式开局，但始终给清晰提示与返回路径
 
-The first release is successful if the following are true:
+## 12. 验收标准
 
-1. A guest can discover the product intent immediately from the homepage
-2. A guest can complete a full run on mobile without confusion
-3. The portrait-to-landscape transition feels intentional rather than broken
-4. The result screen creates a credible reason to log in
-5. A mock login can complete and automatically carry the user into rank submission feedback
-6. The overall structure feels like a product alpha, not a disconnected prototype
+第一版如果达到以下条件，就算成功：
 
-## 13. Delivery Strategy
+1. 用户进入首页后，能迅速理解这是一个什么产品
+2. 游客可以顺畅完成一局
+3. 竖屏到横屏的切换看起来是设计过的，而不是坏掉了
+4. 结算页能自然推动用户去登录
+5. mock 登录后，系统能自动补交成绩并反馈排名
+6. 整体感受像一个产品 Alpha，而不是一堆分散页面和游戏片段
 
-The implementation should be staged around the main product loop:
+## 13. 交付顺序建议
 
-1. Product shell and orientation flow
-2. Minimal but solid gameplay run
-3. Result flow and pending score behavior
-4. Mock login and leaderboard submission
-5. Visual polish and product coherence
+建议后续实现顺序按下面走：
 
-This sequence keeps the rebuild focused and reduces the chance of another overbuilt but unsatisfying V2.
+1. 先搭产品壳与横竖屏流转
+2. 再做最小可玩的一局游戏
+3. 再做结算页与待提交成绩逻辑
+4. 再做 mock 登录与 mock 榜单补交
+5. 最后做视觉统一与产品感打磨
+
+这样可以最大程度降低“又做重了、但还是不满意”的风险。
