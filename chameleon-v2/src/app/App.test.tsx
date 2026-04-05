@@ -2,10 +2,10 @@ import { render, screen } from '@testing-library/react'
 import { App } from './App'
 
 describe('App shell', () => {
-  it('renders the V2 headline and intro copy', () => {
+  it('renders the Chinese V2 shell copy', () => {
     render(<App />)
 
-    expect(screen.getByRole('heading', { name: 'Chameleon V2' })).toBeInTheDocument()
-    expect(screen.getByText('Fresh shell, ready for the rebuild.')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '变色龙 V2' })).toBeInTheDocument()
+    expect(screen.getByText('新的前端底座已就位，后续功能会在这里逐步补齐。')).toBeInTheDocument()
   })
 })
