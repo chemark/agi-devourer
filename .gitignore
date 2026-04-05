@@ -1,6 +1,7 @@
 .DS_Store
 *.log
 node_modules/
+.worktrees/
 
 # API Keys - 本地密钥文件，绝不提交到 Git
 .env
