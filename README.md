@@ -91,7 +91,7 @@ wrangler pages deploy ./dist --project-name agi-tongue-game
 ## 📚 文档目录
 
 - [`chameleon-v2/README.md`](./chameleon-v2/README.md)：v2 子工程说明。
-- [`chameleon/PRD.md`](./chameleon/PRD.md)：v1 / v2 演进 PRD 历史文档。
+- [`PRD.md`](./PRD.md)：v1 / v2 演进 PRD 历史文档。
 - [`开发学习笔记.md`](./开发学习笔记.md)：开发过程中的技术笔记与踩坑总结。
 - [`开发路线图.md`](./开发路线图.md)：版本迭代路线图。
 - [`新手协作指南.md`](./新手协作指南.md)：队友协作和提交流程说明。
