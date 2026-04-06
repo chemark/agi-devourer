@@ -1,14 +1,13 @@
-import { defineConfig, mergeConfig } from 'vite'
+/// <reference path="./vite.config.d.ts" />
+
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-const baseConfig = defineConfig({
+export default defineConfig({
   plugins: [react()],
-})
-
-export default mergeConfig(baseConfig, {
   test: {
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
   },
-} as any)
+})
