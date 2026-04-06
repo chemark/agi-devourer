@@ -22,6 +22,9 @@ export function useAppMachine({ session, leaderboard }: AppMachineArgs) {
     enterGame() {
       setScreen('playing')
     },
+    showResult() {
+      setScreen('result')
+    },
     returnHome() {
       setScreen('home')
     },
