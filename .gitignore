@@ -2,11 +2,11 @@
 *.log
 node_modules/
 .worktrees/
+.superpowers/
+chameleon-v2/node_modules/
+chameleon-v2/dist/
+chameleon-v2/coverage/
 
-# API Keys - 本地密钥文件，绝不提交到 Git
 .env
 .env.local
 .env.*.local
-
-# 不提交开发草稿笔记
-开发学习笔记.md
