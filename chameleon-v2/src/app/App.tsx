@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 
 import HomeScreen from '../features/home/HomeScreen'
+import RotateScreen from '../features/rotate/RotateScreen'
+import { useOrientation } from '../hooks/useOrientation'
 import { authService } from '../services/authService'
 import { leaderboardService } from '../services/leaderboardService'
 import type { LeaderboardEntry, SessionState } from './types'
@@ -9,6 +11,7 @@ import { useAppMachine } from './useAppMachine'
 export function App() {
   const [session, setSession] = useState<SessionState>({ status: 'guest' })
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
+  const orientation = useOrientation()
 
   useEffect(() => {
     void authService.getSession().then(setSession)
@@ -19,12 +22,11 @@ export function App() {
 
   if (machine.screen === 'rotate') {
     return (
-      <main className="app-shell">
-        <section className="hero-card">
-          <h1>准备横屏开局</h1>
-          <p className="hero-copy">下一步会检查横屏状态，再进入正式挑战。</p>
-        </section>
-      </main>
+      <RotateScreen
+        orientation={orientation}
+        onConfirm={machine.enterGame}
+        onBack={machine.returnHome}
+      />
     )
   }
 
