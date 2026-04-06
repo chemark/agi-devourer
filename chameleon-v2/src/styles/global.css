@@ -36,7 +36,7 @@ select {
 
 .hero-card {
   width: min(680px, 100%);
-  padding: clamp(2rem, 5vw, 4rem);
+  padding: clamp(1.5rem, 4vw, 3rem);
   border: 1px solid var(--border);
   border-radius: 28px;
   background: var(--bg-elevated);
@@ -60,10 +60,87 @@ select {
   letter-spacing: -0.06em;
 }
 
-.lede {
-  margin: 1rem 0 0;
-  max-width: 34ch;
-  font-size: 1.1rem;
-  line-height: 1.7;
+.home-screen {
+  width: min(100%, 420px);
+  display: grid;
+  gap: 16px;
+}
+
+.hero-copy {
+  margin: 0.75rem 0 0;
+  line-height: 1.6;
   color: var(--muted);
+}
+
+.hero-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 1.25rem;
+}
+
+.primary-button,
+.secondary-button {
+  width: 100%;
+  border-radius: 999px;
+  padding: 14px 18px;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.primary-button {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 14px 30px rgba(51, 102, 255, 0.24);
+}
+
+.secondary-button {
+  border-color: var(--border);
+  background: white;
+  color: var(--text);
+}
+
+.panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.panel-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.panel-tag {
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: var(--surface-strong);
+  color: var(--accent-strong);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.leaderboard-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.body-copy {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
 }
