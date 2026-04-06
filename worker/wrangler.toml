@@ -1,5 +1,0 @@
-name = "agi-tongue-proxy"
-main = "index.js"
-compatibility_date = "2024-01-01"
-
-# 部署后访问：https://agi-tongue-proxy.<你的子域>.workers.dev/
