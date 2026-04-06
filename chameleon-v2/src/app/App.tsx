@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 import GameCanvas from '../features/game/GameCanvas'
 import HomeScreen from '../features/home/HomeScreen'
+import LoginSheet from '../features/auth/LoginSheet'
 import ResultScreen from '../features/result/ResultScreen'
 import RotateScreen from '../features/rotate/RotateScreen'
 import { useOrientation } from '../hooks/useOrientation'
@@ -17,6 +18,8 @@ export function App() {
   const [latestSummary, setLatestSummary] = useState<RunSummary | null>(null)
   const [resultCopy, setResultCopy] = useState('')
   const [rank, setRank] = useState<number | null>(null)
+  const [loginOpen, setLoginOpen] = useState(false)
+  const [successNote, setSuccessNote] = useState('')
   const orientation = useOrientation()
 
   useEffect(() => {
@@ -29,8 +32,31 @@ export function App() {
   async function handleGameComplete(summary: RunSummary) {
     setLatestSummary(summary)
     setRank(null)
+    setSuccessNote('')
+    setLoginOpen(false)
     setResultCopy(await reportService.buildResultCopy(summary))
     machine.showResult()
+  }
+
+  async function handleLoginAndSubmit(nickname: string) {
+    const normalizedNickname = nickname.trim()
+    const nextSession = await authService.loginWithWeChatMock({
+      nickname: normalizedNickname,
+    })
+    setSession(nextSession)
+
+    if (latestSummary) {
+      const result = await leaderboardService.submitScore({
+        nickname: normalizedNickname,
+        score: latestSummary.score,
+        summary: resultCopy,
+      })
+
+      setRank(result.rank)
+      setSuccessNote(`${normalizedNickname}，成绩已成功上榜。`)
+    }
+
+    setLoginOpen(false)
   }
 
   if (machine.screen === 'rotate') {
@@ -49,15 +75,28 @@ export function App() {
 
   if (machine.screen === 'result' && latestSummary) {
     return (
-      <ResultScreen
-        summary={latestSummary}
-        resultCopy={resultCopy}
-        rank={rank}
-        isGuest={session.status === 'guest'}
-        onLogin={() => undefined}
-        onReplay={machine.startChallenge}
-        onHome={machine.returnHome}
-      />
+      <>
+        <ResultScreen
+          summary={latestSummary}
+          resultCopy={resultCopy}
+          rank={rank}
+          isGuest={session.status === 'guest'}
+          successNote={successNote}
+          onLogin={() => setLoginOpen(true)}
+          onReplay={() => {
+            setSuccessNote('')
+            setLoginOpen(false)
+            machine.startChallenge()
+          }}
+          onHome={machine.returnHome}
+        />
+        {loginOpen ? (
+          <LoginSheet
+            onSubmit={handleLoginAndSubmit}
+            onClose={() => setLoginOpen(false)}
+          />
+        ) : null}
+      </>
     )
   }
 

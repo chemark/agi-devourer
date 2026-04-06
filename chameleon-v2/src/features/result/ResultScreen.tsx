@@ -5,6 +5,7 @@ type Props = {
   resultCopy: string
   rank: number | null
   isGuest: boolean
+  successNote: string
   onLogin: () => void
   onReplay: () => void
   onHome: () => void
@@ -15,6 +16,7 @@ export default function ResultScreen({
   resultCopy,
   rank,
   isGuest,
+  successNote,
   onLogin,
   onReplay,
   onHome,
@@ -33,6 +35,7 @@ export default function ResultScreen({
               ? `当前排名 #${rank}`
               : '已登录，等待上榜反馈。'}
         </p>
+        {successNote ? <p className="success-note">{successNote}</p> : null}
         <div className="hero-actions">
           {isGuest ? (
             <button className="primary-button" type="button" onClick={onLogin}>
