@@ -9,3 +9,6 @@ node_modules/
 
 # 不提交开发草稿笔记
 开发学习笔记.md
+
+# 工作区配置
+.worktrees/
