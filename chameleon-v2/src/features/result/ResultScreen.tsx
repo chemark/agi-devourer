@@ -1,6 +1,7 @@
 import type { RunSummary } from '../../app/types'
 
 type Props = {
+  compact?: boolean
   summary: RunSummary
   resultCopy: string
   rank: number | null
@@ -12,6 +13,7 @@ type Props = {
 }
 
 export default function ResultScreen({
+  compact = false,
   summary,
   resultCopy,
   rank,
@@ -22,11 +24,16 @@ export default function ResultScreen({
   onHome,
 }: Props) {
   return (
-    <main className="app-shell">
-      <section className="hero-card">
+    <main
+      className={`app-shell${compact ? ' is-compact' : ''}`}
+      data-layout={compact ? 'compact' : 'regular'}
+    >
+      <section className={`hero-card${compact ? ' is-compact' : ''}`}>
         <p className="eyebrow">结果页</p>
         <h1>本局战报</h1>
-        <p className="result-score">{summary.score} 分</p>
+        <p className={`result-score${compact ? ' is-compact' : ''}`}>
+          {summary.score} 分
+        </p>
         <p className="hero-copy">{resultCopy}</p>
         <p className="body-copy">
           {isGuest
@@ -36,7 +43,7 @@ export default function ResultScreen({
               : '已登录，等待上榜反馈。'}
         </p>
         {successNote ? <p className="success-note">{successNote}</p> : null}
-        <div className="hero-actions">
+        <div className={`hero-actions${compact ? ' is-inline' : ''}`}>
           {isGuest ? (
             <button className="primary-button" type="button" onClick={onLogin}>
               登录后上榜

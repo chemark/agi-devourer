@@ -5,7 +5,7 @@ import HomeScreen from '../features/home/HomeScreen'
 import LoginSheet from '../features/auth/LoginSheet'
 import ResultScreen from '../features/result/ResultScreen'
 import RotateScreen from '../features/rotate/RotateScreen'
-import { useOrientation } from '../hooks/useOrientation'
+import { useViewportProfile } from '../hooks/useOrientation'
 import { authService } from '../services/authService'
 import { leaderboardService } from '../services/leaderboardService'
 import { reportService } from '../services/reportService'
@@ -20,7 +20,7 @@ export function App() {
   const [rank, setRank] = useState<number | null>(null)
   const [loginOpen, setLoginOpen] = useState(false)
   const [successNote, setSuccessNote] = useState('')
-  const orientation = useOrientation()
+  const { orientation, isCompactLandscape } = useViewportProfile()
 
   useEffect(() => {
     void authService.getSession().then(setSession)
@@ -70,13 +70,19 @@ export function App() {
   }
 
   if (machine.screen === 'playing') {
-    return <GameCanvas onComplete={handleGameComplete} />
+    return (
+      <GameCanvas
+        compact={isCompactLandscape}
+        onComplete={handleGameComplete}
+      />
+    )
   }
 
   if (machine.screen === 'result' && latestSummary) {
     return (
       <>
         <ResultScreen
+          compact={isCompactLandscape}
           summary={latestSummary}
           resultCopy={resultCopy}
           rank={rank}
@@ -92,6 +98,7 @@ export function App() {
         />
         {loginOpen ? (
           <LoginSheet
+            compact={isCompactLandscape}
             onSubmit={handleLoginAndSubmit}
             onClose={() => setLoginOpen(false)}
           />

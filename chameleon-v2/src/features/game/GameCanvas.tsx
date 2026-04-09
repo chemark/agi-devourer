@@ -11,6 +11,7 @@ import {
 } from './gameEngine'
 
 type Props = {
+  compact?: boolean
   onComplete: (summary: RunSummary) => void
 }
 
@@ -48,7 +49,7 @@ function drawGame(ctx: CanvasRenderingContext2D, state: GameState) {
   ctx.restore()
 }
 
-export default function GameCanvas({ onComplete }: Props) {
+export default function GameCanvas({ compact = false, onComplete }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const rafRef = useRef<number | null>(null)
   const lastTimeRef = useRef<number | null>(null)
@@ -113,7 +114,10 @@ export default function GameCanvas({ onComplete }: Props) {
   const seconds = Math.ceil(state.remainingMs / 1000)
 
   return (
-    <section className="game-shell">
+    <section
+      className={`game-shell${compact ? ' is-compact' : ''}`}
+      data-layout={compact ? 'compact' : 'regular'}
+    >
       <canvas
         ref={canvasRef}
         className="game-canvas"

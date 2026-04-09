@@ -2,15 +2,27 @@ import { useEffect, useState } from 'react'
 
 export type Orientation = 'portrait' | 'landscape'
 
-function getOrientation(): Orientation {
-  return window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'
+export type ViewportProfile = {
+  orientation: Orientation
+  isCompactLandscape: boolean
 }
 
-export function useOrientation() {
-  const [orientation, setOrientation] = useState<Orientation>(getOrientation)
+function getViewportProfile(): ViewportProfile {
+  const orientation =
+    window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'
+
+  return {
+    orientation,
+    isCompactLandscape:
+      orientation === 'landscape' && window.innerHeight <= 430,
+  }
+}
+
+export function useViewportProfile() {
+  const [profile, setProfile] = useState<ViewportProfile>(getViewportProfile)
 
   useEffect(() => {
-    const onResize = () => setOrientation(getOrientation())
+    const onResize = () => setProfile(getViewportProfile())
 
     window.addEventListener('resize', onResize)
 
@@ -19,5 +31,9 @@ export function useOrientation() {
     }
   }, [])
 
-  return orientation
+  return profile
+}
+
+export function useOrientation() {
+  return useViewportProfile().orientation
 }

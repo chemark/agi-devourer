@@ -34,6 +34,10 @@ select {
   padding: 2rem;
 }
 
+.app-shell.is-compact {
+  padding: 0.75rem;
+}
+
 .hero-card {
   width: min(680px, 100%);
   padding: clamp(1.5rem, 4vw, 3rem);
@@ -42,6 +46,12 @@ select {
   background: var(--bg-elevated);
   backdrop-filter: blur(18px);
   box-shadow: var(--shadow);
+}
+
+.hero-card.is-compact {
+  width: min(720px, 100%);
+  padding: 1rem 1rem 1.125rem;
+  border-radius: 20px;
 }
 
 .eyebrow {
@@ -60,6 +70,10 @@ select {
   letter-spacing: -0.06em;
 }
 
+.hero-card.is-compact h1 {
+  font-size: clamp(2rem, 5vw, 2.8rem);
+}
+
 .home-screen {
   width: min(100%, 420px);
   display: grid;
@@ -76,6 +90,18 @@ select {
   display: grid;
   gap: 12px;
   margin-top: 1.25rem;
+}
+
+.hero-actions.is-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 1rem;
+}
+
+.hero-actions.is-inline > * {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .primary-button,
@@ -108,6 +134,17 @@ select {
   background: #f5efe5;
 }
 
+.game-shell.is-compact {
+  min-height: 100svh;
+  grid-template-columns: minmax(0, 1fr) clamp(180px, 26vw, 220px);
+  grid-template-areas:
+    'canvas controls'
+    'canvas hint';
+  align-content: center;
+  gap: 10px 12px;
+  padding: 10px 12px;
+}
+
 .game-canvas {
   width: min(100%, 844px);
   height: auto;
@@ -116,12 +153,26 @@ select {
   background: #fff7ed;
 }
 
+.game-shell.is-compact .game-canvas {
+  grid-area: canvas;
+  width: 100%;
+  max-width: none;
+}
+
 .game-controls {
   width: min(100%, 844px);
   display: grid;
   grid-template-columns: 1fr 220px;
   gap: 16px;
   align-items: end;
+}
+
+.game-shell.is-compact .game-controls {
+  grid-area: controls;
+  width: 100%;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  align-self: center;
 }
 
 .slider-group {
@@ -138,6 +189,13 @@ select {
   color: var(--muted);
 }
 
+.game-shell.is-compact .game-hint {
+  grid-area: hint;
+  align-self: start;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
 .sheet-backdrop {
   position: fixed;
   inset: 0;
@@ -145,6 +203,11 @@ select {
   place-items: end center;
   background: rgba(31, 26, 23, 0.36);
   padding: 16px;
+}
+
+.sheet-backdrop.is-compact {
+  place-items: center;
+  padding: 12px;
 }
 
 .sheet-card {
@@ -155,10 +218,20 @@ select {
   border: 1px solid var(--border);
 }
 
+.sheet-card.is-compact {
+  width: min(100%, 760px);
+  border-radius: 22px;
+  padding: 16px;
+}
+
 .input-group {
   display: grid;
   gap: 8px;
   margin: 16px 0 20px;
+}
+
+.input-group.is-compact {
+  margin: 12px 0 16px;
 }
 
 .input-group input {
@@ -225,6 +298,11 @@ select {
   font-size: 32px;
   font-weight: 800;
   color: var(--accent-strong);
+}
+
+.result-score.is-compact {
+  margin-bottom: 8px;
+  font-size: 24px;
 }
 
 @media (max-width: 640px) {
